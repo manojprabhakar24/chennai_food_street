@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'menu.dart';
+import '../provider/menu.dart';
 
 class FavoritesScreen extends StatelessWidget {
   @override
@@ -12,7 +12,7 @@ class FavoritesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Favorites'),
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Colors.grey,
       ),
       body: favoriteItems.isEmpty
           ? Center(child: Text('No favorites yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))

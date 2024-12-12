@@ -13,7 +13,7 @@ class MenuProvider with ChangeNotifier {
     },
     {
       'id': 2,
-      'name': 'Biryani',
+      'name': 'briyani',
       'price': 639.20,
       'category': 'Rice',
       'image': 'assets/images/briyani.jpg',
@@ -51,6 +51,7 @@ class MenuProvider with ChangeNotifier {
       'image': 'assets/images/pizza.jpg',
       'description': 'A spicy pizza with fresh mozzarella, tomato sauce, and fiery toppings.',
     },
+
   ];
 
   // **State Management Fields**

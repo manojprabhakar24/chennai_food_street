@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:badges/badges.dart';  // Import the badges package
 import 'cart_page.dart'; // Import your cart page
-import 'menu.dart'; // Make sure MenuProvider is imported
+import '../provider/menu.dart'; // Make sure MenuProvider is imported
 import 'profile_screen.dart';
 import 'Discount_screen.dart';
 import 'Favourite_screen.dart';
 import 'homepage.dart';
-import 'package:flutter/material.dart' hide Badge; // Hide Badge from Flutter's Material package
-import 'package:badges/badges.dart'; // Import badges package normally
-import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;  // Alias the badges package
 
 class RestaurantHomepage extends StatefulWidget {
@@ -36,8 +32,17 @@ class _RestaurantHomepageState extends State<RestaurantHomepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chennai Specials'),
-        backgroundColor: Colors.deepOrangeAccent,
+        title: Center(
+          child: Text(
+            'Chennai Food Street',
+            style: TextStyle(
+              fontSize: 24, // Font size
+              fontWeight: FontWeight.bold, // Font weight
+              fontFamily: 'Roboto', // Customize the font family (use a valid font)
+              color: Colors.white, // Font color
+            ),
+          ),
+        ),        backgroundColor: Colors.deepOrangeAccent,
         actions: [
           Consumer<MenuProvider>(
             builder: (context, menuProvider, child) {

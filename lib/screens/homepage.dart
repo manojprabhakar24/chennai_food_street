@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'menu.dart';
+import '../provider/menu.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,16 +30,20 @@ class HomeScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: TextField(
-        controller: TextEditingController(text: menuProvider.searchQuery),  // Make sure the text field reflects the search query
-        onChanged: (query) => menuProvider.updateSearchQuery(query),  // Update query in provider
+        // Use the search query from the provider to manage the text
+        controller: TextEditingController(text: menuProvider.searchQuery)
+          ..selection = TextSelection.collapsed(offset: menuProvider.searchQuery.length),
+        onChanged: (query) {
+          menuProvider.updateSearchQuery(query); // Update query in provider
+        },
         decoration: InputDecoration(
           hintText: 'Search for food...',
           prefixIcon: Icon(Icons.search),
-          suffixIcon: menuProvider.searchQuery.isNotEmpty // Show clear icon only if there's text in the field
+          suffixIcon: menuProvider.searchQuery.isNotEmpty // Show clear icon only if there's text
               ? IconButton(
             icon: Icon(Icons.clear),
             onPressed: () {
-              menuProvider.updateSearchQuery('');  // Clear the search query in provider
+              menuProvider.updateSearchQuery('');  // Clear the search query
             },
           )
               : null,
@@ -77,7 +86,15 @@ class HomeScreen extends StatelessWidget {
     return Consumer<MenuProvider>(
       builder: (context, menuProvider, child) {
         double screenWidth = MediaQuery.of(context).size.width;
-        int crossAxisCount = screenWidth > 600 ? 4 : 2;
+        int crossAxisCount = screenWidth > 900
+            ? 4
+            : screenWidth > 600
+            ? 3
+            : 2; // Dynamically adjust crossAxisCount
+
+        double childAspectRatio = screenWidth > 600
+            ? 2 / 3
+            : 3 / 4; // Adjust aspect ratio for tablets and mobile
 
         return SizedBox(
           height: screenWidth > 600
@@ -98,7 +115,7 @@ class HomeScreen extends StatelessWidget {
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 3 / 4,
+              childAspectRatio: childAspectRatio, // Use dynamic aspect ratio
             ),
             itemBuilder: (context, index) {
               final item = menuProvider.filteredMenuItems[index];
@@ -108,8 +125,7 @@ class HomeScreen extends StatelessWidget {
         );
       },
     );
-  }
-  Widget _buildFoodDetailDialog(BuildContext context, Map<String, dynamic> item) {
+  }  Widget _buildFoodDetailDialog(BuildContext context, Map<String, dynamic> item) {
     final menuProvider = Provider.of<MenuProvider>(context);
     bool isFavorite = menuProvider.isFavorite(item['id']);
     bool isInCart = menuProvider.isInCart(item['id']);
@@ -183,13 +199,23 @@ class HomeScreen extends StatelessWidget {
   }
 
   // Food Card Widget
+// Food Card Widget
   Widget _buildFoodCard(BuildContext context, Map<String, dynamic> item) {
     final menuProvider = Provider.of<MenuProvider>(context);
     bool isFavorite = menuProvider.isFavorite(item['id']);
     bool isInCart = menuProvider.isInCart(item['id']);
 
     // Check if the screen width is less than a threshold (e.g., 600px for mobile)
-    bool isMobileView = MediaQuery.of(context).size.width < 600;
+    double screenWidth = MediaQuery.of(context).size.width;
+    bool isMobileView = screenWidth < 600;
+    bool isTabletView = screenWidth >= 600 && screenWidth < 900;
+
+    // Dynamically adjust aspect ratio and card height based on screen width
+    double cardHeight = isMobileView
+        ? 250.0 // Default height for mobile
+        : isTabletView
+        ? 300.0 // Reduced height for tablet view
+        : 350.0; // Reduced height for desktop view
 
     return GestureDetector(
       onTap: isMobileView
@@ -305,5 +331,4 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-}
+  }}

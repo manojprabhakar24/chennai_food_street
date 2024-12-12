@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'constants.dart';
-import 'homepage.dart';
-import 'main_screen.dart';
-import 'menu.dart';
-import 'package:flutter/rendering.dart';
+import 'screens/main_screen.dart';
+import 'provider/menu.dart';
 
 
 void main() {
