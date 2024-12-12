@@ -42,37 +42,40 @@ class _RestaurantHomepageState extends State<RestaurantHomepage> {
               color: Colors.white, // Font color
             ),
           ),
-        ),        backgroundColor: Colors.deepOrangeAccent,
+        ),
+        backgroundColor: Colors.deepOrangeAccent,
         actions: [
           Consumer<MenuProvider>(
             builder: (context, menuProvider, child) {
               return Padding(
-                  padding: EdgeInsets.only(right: 20), // Add some padding to move it left
-              child: badges.Badge(
-                badgeContent: Text(
-                  menuProvider.cartItems.length.toString(),
-                  style: TextStyle(color: Colors.white),
+                padding: EdgeInsets.only(right: 20), // Add some padding to move it left
+                child: badges.Badge(
+                  badgeContent: Text(
+                    menuProvider.cartItems.length.toString(),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      // Directly navigate to the CartScreen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CartScreen()),
+                      );
+                    },
+                  ),
                 ),
-
-                child: IconButton(
-                  icon: Icon(Icons.shopping_cart),
-                  onPressed: () {
-                    // Directly navigate to the CartScreen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CartScreen()),
-                    );
-                  },
-                )
-              ));
+              );
             },
-          )
-
+          ),
         ],
       ),
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),
-        child: _pages[_currentIndex], // Smooth page transition
+        child: Padding(
+          padding: EdgeInsets.all(11.0), // Add padding around each screen
+          child: _pages[_currentIndex], // Smooth page transition
+        ),
       ),
       bottomNavigationBar: AnimatedContainer(
         duration: Duration(milliseconds: 300),
