@@ -1,11 +1,16 @@
-import 'package:chennai_food_street/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:badges/badges.dart';  // Import the badges package
+import 'cart_page.dart'; // Import your cart page
+import 'menu.dart'; // Make sure MenuProvider is imported
+import 'profile_screen.dart';
 import 'Discount_screen.dart';
 import 'Favourite_screen.dart';
-import 'cart_page.dart';
 import 'homepage.dart';
+import 'package:flutter/material.dart' hide Badge; // Hide Badge from Flutter's Material package
+import 'package:badges/badges.dart'; // Import badges package normally
+import 'package:flutter/material.dart';
+import 'package:badges/badges.dart' as badges;  // Alias the badges package
 
 class RestaurantHomepage extends StatefulWidget {
   @override
@@ -34,17 +39,30 @@ class _RestaurantHomepageState extends State<RestaurantHomepage> {
         title: Text('Chennai Specials'),
         backgroundColor: Colors.deepOrangeAccent,
         actions: [
-          // Cart Icon Button
-          IconButton(
-            icon: Icon(Icons.shopping_cart),
-            onPressed: () {
-              // Navigate to the CartScreen
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CartScreen()),
-              );
+          Consumer<MenuProvider>(
+            builder: (context, menuProvider, child) {
+              return Padding(
+                  padding: EdgeInsets.only(right: 20), // Add some padding to move it left
+              child: badges.Badge(
+                badgeContent: Text(
+                  menuProvider.cartItems.length.toString(),
+                  style: TextStyle(color: Colors.white),
+                ),
+
+                child: IconButton(
+                  icon: Icon(Icons.shopping_cart),
+                  onPressed: () {
+                    // Directly navigate to the CartScreen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CartScreen()),
+                    );
+                  },
+                )
+              ));
             },
-          ),
+          )
+
         ],
       ),
       body: AnimatedSwitcher(

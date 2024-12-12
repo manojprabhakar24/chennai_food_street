@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MenuProvider with ChangeNotifier {
-  // Menu and cart items
-  List<Map<String, dynamic>> _cartItems = [];
+  // **Menu Items**
   final List<Map<String, dynamic>> _menuItems = [
     {
       'id': 1,
@@ -14,7 +13,7 @@ class MenuProvider with ChangeNotifier {
     },
     {
       'id': 2,
-      'name': 'Briyani',
+      'name': 'Biryani',
       'price': 639.20,
       'category': 'Rice',
       'image': 'assets/images/briyani.jpg',
@@ -26,7 +25,7 @@ class MenuProvider with ChangeNotifier {
       'price': 479.20,
       'category': 'Desserts',
       'image': 'assets/images/cake.jpg',
-      'description': 'A rich, coffee-flavored dessert made with mascarpone cheese.',
+      'description': 'A rich, coffee-flavored dessert made with mascarpone cheese and butter.',
     },
     {
       'id': 4,
@@ -46,77 +45,113 @@ class MenuProvider with ChangeNotifier {
     },
     {
       'id': 6,
-      'name': 'volcano Pizza',
-      'price': 1000,
+      'name': 'Volcano Pizza',
+      'price': 1000.0,
       'category': 'Pizza',
       'image': 'assets/images/pizza.jpg',
-      'description': 'A classic pizza with fresh mozzarella, tomato sauce, and basil.',
+      'description': 'A spicy pizza with fresh mozzarella, tomato sauce, and fiery toppings.',
     },
   ];
 
-  final Map<int, int> _itemCounts = {};
-  final List<int> _favoriteItems = []; // List to hold favorite item IDs
+  // **State Management Fields**
+  String _searchQuery = '';
+
+  List<Map<String, dynamic>> _filteredMenuItems = [];
   String _selectedCategory = 'All';
+  final List<Map<String, dynamic>> _cartItems = [];
+  final Map<int, int> _itemCounts = {}; // Tracks item quantities in cart
+  final List<int> _favoriteItems = []; // Stores favorite item IDs
+// **Unfiltered Menu Items Getter**
+  List<Map<String, dynamic>> get menuItems => List.unmodifiable(_menuItems);
 
-  // Getters
+  // **Category Management**
   String get selectedCategory => _selectedCategory;
-  List<Map<String, dynamic>> get menuItems => _menuItems;
 
-  List<Map<String, dynamic>> get filteredMenuItems {
-    if (_selectedCategory == 'All') {
-      return _menuItems;
-    }
-    return _menuItems.where((item) => item['category'] == _selectedCategory).toList();
-  }
-
-  List<Map<String, dynamic>> get cartItems => _cartItems;
-  List<int> get favoriteItems => _favoriteItems;
-
-  // Category Selection
   void selectCategory(String category) {
     _selectedCategory = category;
     notifyListeners();
   }
 
-  // Cart Functions
+  // **Search Query Management**
+  String get searchQuery => _searchQuery;
+
+  void updateSearchQuery(String query) {
+    _searchQuery = query;
+    if (query.isEmpty) {
+      _filteredMenuItems = _menuItems;  // Show all items if search is cleared
+    } else {
+      _filteredMenuItems = _menuItems
+          .where((item) =>
+          item['name'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    notifyListeners();
+  }
+
+  // **Filtered Menu Items**
+  List<Map<String, dynamic>> get filteredMenuItems {
+    List<Map<String, dynamic>> items = _menuItems;
+
+    // Filter by selected category
+    if (_selectedCategory != 'All') {
+      items = items.where((item) => item['category'] == _selectedCategory).toList();
+    }
+
+    // Filter by search query
+    if (_searchQuery.isNotEmpty) {
+      items = items
+          .where((item) =>
+      item['name'].toLowerCase().contains(_searchQuery) ||
+          item['description'].toLowerCase().contains(_searchQuery))
+          .toList();
+    }
+
+    return items;
+  }
+
+  // **Cart Management**
+  List<Map<String, dynamic>> get cartItems => _cartItems;
+
   bool isInCart(int id) => _cartItems.any((item) => item['id'] == id);
 
   void addToCart(Map<String, dynamic> item) {
     if (!_cartItems.any((cartItem) => cartItem['id'] == item['id'])) {
       _cartItems.add(item);
-      _itemCounts[item['id']] = 1; // Initialize quantity to 1 when added to the cart
+      _itemCounts[item['id']] = 1; // Initialize quantity to 1 when added to cart
       notifyListeners();
     }
   }
 
-
   void removeFromCart(int id) {
     _cartItems.removeWhere((item) => item['id'] == id);
+    _itemCounts.remove(id); // Remove count when item is removed
     notifyListeners();
   }
+
   void clearCart() {
     _cartItems.clear();
     _itemCounts.clear();
-    notifyListeners(); // Notify listeners that the cart has been cleared
+    notifyListeners();
   }
-  // Item Count Functions
+
+  // **Cart Item Count Management**
+  int getItemCount(int itemId) => _itemCounts[itemId] ?? 0;
+
   void increaseItemCount(int itemId) {
     _itemCounts[itemId] = (_itemCounts[itemId] ?? 0) + 1;
     notifyListeners();
   }
 
   void decreaseItemCount(int itemId) {
-    if (_itemCounts[itemId] != null && _itemCounts[itemId]! > 0) {
+    if (_itemCounts[itemId] != null && _itemCounts[itemId]! > 1) {
       _itemCounts[itemId] = _itemCounts[itemId]! - 1;
       notifyListeners();
     }
   }
 
-  int getItemCount(int itemId) {
-    return _itemCounts[itemId] ?? 0;
-  }
+  // **Favorite Management**
+  List<int> get favoriteItems => _favoriteItems;
 
-  // Favorite Functions
   bool isFavorite(int itemId) => _favoriteItems.contains(itemId);
 
   void addFavorite(int itemId) {
@@ -125,18 +160,20 @@ class MenuProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void removeFavorite(int itemId) {
+    if (_favoriteItems.contains(itemId)) {
+      _favoriteItems.remove(itemId);
+      notifyListeners();
+    }
+  }
+
   void toggleFavorite(int itemId) {
     if (_favoriteItems.contains(itemId)) {
-      // If the item is already in favorites, remove it
       _favoriteItems.remove(itemId);
     } else {
-      // Otherwise, add the item to favorites
       _favoriteItems.add(itemId);
     }
-    notifyListeners(); // Notify listeners to update the UI
-  }
-  void removeFavorite(int itemId) {
-    _favoriteItems.remove(itemId);
     notifyListeners();
   }
 }
