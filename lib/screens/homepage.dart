@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             _buildSearchBar(context),
             _buildCategories(context),
-            _buildFoodGrid(context),
+            _buildFoodGrid(context),  // Grid is scrollable now
           ],
         ),
       ),
@@ -30,20 +30,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: TextField(
-        // Use the search query from the provider to manage the text
         controller: TextEditingController(text: menuProvider.searchQuery)
           ..selection = TextSelection.collapsed(offset: menuProvider.searchQuery.length),
         onChanged: (query) {
-          menuProvider.updateSearchQuery(query); // Update query in provider
+          menuProvider.updateSearchQuery(query);
         },
         decoration: InputDecoration(
           hintText: 'Search for food...',
           prefixIcon: Icon(Icons.search),
-          suffixIcon: menuProvider.searchQuery.isNotEmpty // Show clear icon only if there's text
+          suffixIcon: menuProvider.searchQuery.isNotEmpty
               ? IconButton(
             icon: Icon(Icons.clear),
             onPressed: () {
-              menuProvider.updateSearchQuery('');  // Clear the search query
+              menuProvider.updateSearchQuery('');
             },
           )
               : null,
@@ -90,116 +89,39 @@ class _HomeScreenState extends State<HomeScreen> {
             ? 4
             : screenWidth > 600
             ? 3
-            : 2; // Dynamically adjust crossAxisCount
+            : 2;
 
         double childAspectRatio = screenWidth > 600
             ? 2 / 3
-            : 3 / 4; // Adjust aspect ratio for tablets and mobile
+            : 3 / 4;
 
-        return SizedBox(
-          height: screenWidth > 600
-              ? MediaQuery.of(context).size.height * 0.6
-              : null,  // No fixed height for smaller screens
-          child: menuProvider.filteredMenuItems.isEmpty
-              ? Center(
-            child: Text(
-              'No items found',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          )
-              : GridView.builder(
-            shrinkWrap: true,
-            physics: BouncingScrollPhysics(),  // Allows smooth scrolling
-            itemCount: menuProvider.filteredMenuItems.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: childAspectRatio, // Use dynamic aspect ratio
-            ),
-            itemBuilder: (context, index) {
-              final item = menuProvider.filteredMenuItems[index];
-              return _buildFoodCard(context, item);
-            },
+        return menuProvider.filteredMenuItems.isEmpty
+            ? Center(
+          child: Text(
+            'No items found',
+            style: TextStyle(fontSize: 18, color: Colors.grey),
           ),
+        )
+            : GridView.builder(
+          shrinkWrap: true,  // Makes the grid take up only as much space as it needs
+          physics: NeverScrollableScrollPhysics(), // Prevents the grid from scrolling independently
+          itemCount: menuProvider.filteredMenuItems.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemBuilder: (context, index) {
+            final item = menuProvider.filteredMenuItems[index];
+            return _buildFoodCard(context, item);
+          },
         );
       },
-    );
-  }  Widget _buildFoodDetailDialog(BuildContext context, Map<String, dynamic> item) {
-    final menuProvider = Provider.of<MenuProvider>(context);
-    bool isFavorite = menuProvider.isFavorite(item['id']);
-    bool isInCart = menuProvider.isInCart(item['id']);
-
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Image
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Image.asset(
-                      item['image'],
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16),
-
-                // Food Name and Price
-                Text(
-                  item['name'],
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '₹${item['price']}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.green),
-                ),
-                SizedBox(height: 16),
-
-                // Description
-                SingleChildScrollView(
-                  child: Text(
-                    item['description'] ?? 'No description available',
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                    textAlign: TextAlign.justify,
-                  ),
-                ),
-                SizedBox(height: 16),
-
-                // Add to Cart Button
-                ElevatedButton(
-                  onPressed: isInCart ? null : () => menuProvider.addToCart(item),
-                  child: Text(isInCart ? 'In Cart' : 'Add to Cart'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isInCart ? Colors.grey : Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 12.0),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-        ],
-      ),
     );
   }
 
   // Food Card Widget
-// Food Card Widget
   Widget _buildFoodCard(BuildContext context, Map<String, dynamic> item) {
     final menuProvider = Provider.of<MenuProvider>(context);
     bool isFavorite = menuProvider.isFavorite(item['id']);
@@ -220,13 +142,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: isMobileView
           ? () {
-        // Open dialog with item details
         showDialog(
           context: context,
           builder: (context) => _buildFoodDetailDialog(context, item),
         );
       }
-          : null, // No action for larger screens
+          : null,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 5.0,
@@ -298,13 +219,11 @@ class _HomeScreenState extends State<HomeScreen> {
             if (!isMobileView)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(
-                      item['description'] ?? 'No description available',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
-                      textAlign: TextAlign.justify,
-                    ),
+                child: SingleChildScrollView( // Removed Expanded and used SingleChildScrollView
+                  child: Text(
+                    item['description'] ?? 'No description available',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                    textAlign: TextAlign.justify,
                   ),
                 ),
               ),
@@ -331,4 +250,91 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }}
+  }
+
+  // Food Detail Dialog
+  Widget _buildFoodDetailDialog(BuildContext context, Map<String, dynamic> item) {
+    final menuProvider = Provider.of<MenuProvider>(context);
+    bool isFavorite = menuProvider.isFavorite(item['id']);
+    bool isInCart = menuProvider.isInCart(item['id']);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: Image.asset(
+                      item['image'],
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+
+                // Food Name and Price
+                Text(
+                  item['name'],
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  '₹${item['price']}',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.green),
+                ),
+                SizedBox(height: 16),
+
+                // Description
+                SingleChildScrollView(
+                  child: Text(
+                    item['description'] ?? 'No description available',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                    textAlign: TextAlign.justify,
+                  ),
+                ),
+                SizedBox(height: 16),
+
+                // Add to Cart Button
+                ElevatedButton(
+                  onPressed: isInCart ? null : () => menuProvider.addToCart(item),
+                  child: Text(isInCart ? 'In Cart' : 'Add to Cart'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isInCart ? Colors.grey : Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Close Button
+          Positioned(
+            top: 8,
+            right: 8,
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              child: Icon(
+                Icons.close,
+                color: Colors.black,
+                size: 30,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
